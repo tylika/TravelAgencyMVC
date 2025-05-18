@@ -165,6 +165,45 @@ namespace TravelAgencyInfrastructure.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+        public async Task<IActionResult> ForRecentTours(DateTime? afterDate)
+        {
+            ViewData["CurrentAfterDate"] = afterDate?.ToString("yyyy-MM-dd"); // Для input type="date"
+
+            if (_context.Reviews == null)
+            {
+                return Problem("Entity set 'TravelAgencyDbContext.Reviews' is null.");
+            }
+
+            var reviewsQuery = _context.Reviews
+                                     .Include(r => r.Tour)
+                                        .ThenInclude(t => t.Country) 
+                                     .Include(r => r.Client)
+                                     .AsQueryable();
+
+            if (afterDate.HasValue)
+            {
+                
+                DateTime dateOnlyAfter = afterDate.Value.Date;
+                reviewsQuery = reviewsQuery.Where(r => r.Tour.StartDate.Date >= dateOnlyAfter);
+            }
+
+            var reviews = await reviewsQuery.OrderByDescending(r => r.Tour.StartDate).ThenByDescending(r => r.ReviewDate).ToListAsync();
+
+            if (!reviews.Any() && afterDate.HasValue)
+            {
+                ViewData["NoResultsMessage"] = "Відгуків на тури, що починаються після вказаної дати, не знайдено.";
+            }
+            else if (!afterDate.HasValue && !reviews.Any())
+            {
+                ViewData["NoResultsMessage"] = "Відгуків ще немає.";
+            }
+            else if (!afterDate.HasValue && reviews.Any())
+            {
+                ViewData["InfoMessage"] = "Показано всі відгуки. Вкажіть дату, щоб відфільтрувати тури, що почалися після неї.";
+            }
+
+            return View(reviews); 
+        }
 
         private bool ReviewExists(int id)
         {

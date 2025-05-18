@@ -162,7 +162,34 @@ namespace TravelAgencyInfrastructure.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+        // GET: Tours/SearchByCountryAndPrice
+        // Або просто /Tours/Search, якщо хочете
+        public async Task<IActionResult> SearchByCountryAndPrice(string? countryName, decimal? maxPrice)
+        {
+            ViewData["CurrentCountryName"] = countryName;
+            ViewData["CurrentMaxPrice"] = maxPrice;
 
+            var toursQuery = _context.Tours
+                                     .Include(t => t.Country)
+                                     .Include(t => t.Hotel)
+                                     .AsQueryable(); // Починаємо будувати запит
+
+            if (!string.IsNullOrEmpty(countryName))
+            {
+                toursQuery = toursQuery.Where(t => t.Country.CountryName.Contains(countryName));
+            }
+
+            if (maxPrice.HasValue)
+            {
+                toursQuery = toursQuery.Where(t => t.PricePerPerson <= maxPrice.Value);
+            }
+
+            var tours = await toursQuery.ToListAsync();
+
+            // Якщо це перший запит (без параметрів), можна повертати порожній список або всі тури
+            // Зараз, якщо параметри не задані, поверне всі тури (або відфільтровані, якщо один параметр заданий)
+            return View(tours);
+        }
         private bool TourExists(int id)
         {
             return _context.Tours.Any(e => e.TourId == id);

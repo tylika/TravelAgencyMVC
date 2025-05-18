@@ -1,0 +1,30 @@
+﻿@* Файл: TravelAgencyInfrastructure/Views/Home/SimpleQueriesList.cshtml *@
+@{
+    ViewData["Title"] = "Прості Параметризовані Запити";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>Оберіть запит зі списку нижче, щоб перейти до сторінки введення параметрів та перегляду результатів.</p>
+
+<div class="list-group mt-4">
+    <a asp-controller="Tours" asp-action="SearchByCountryAndPrice" class="list-group-item list-group-item-action">
+        <strong>Запит 1:</strong> Тури за країною та максимальною ціною
+    </a>
+    <a asp-controller="Clients" asp-action="SearchActiveClients" class="list-group-item list-group-item-action">
+        <strong>Запит 2:</strong> Пошук активних клієнтів (з бронюваннями) за ім'ям/прізвищем
+    </a>
+    <a asp-controller="Bookings" asp-action="SearchByEmployeeAndDate" class="list-group-item list-group-item-action">
+        <strong>Запит 3:</strong> Бронювання конкретного співробітника за діапазон дат
+    </a>
+    <a asp-controller="Hotels" asp-action="SearchByCountryNameAndRating" class="list-group-item list-group-item-action">
+        <strong>Запит 4:</strong> Готелі за назвою країни та мінімальним рейтингом
+    </a>
+    <a asp-controller="Reviews" asp-action="ForRecentTours" class="list-group-item list-group-item-action">
+        <strong>Запит 5:</strong> Відгуки на тури, що починаються після певної дати
+    </a>
+</div>
+
+<div class="mt-4">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Повернутися на Головну</a>
+</div>

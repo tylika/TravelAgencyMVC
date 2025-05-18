@@ -240,5 +240,68 @@ namespace TravelAgencyInfrastructure.Controllers
             };
             return new SelectList(statuses, "Value", "Text", selectedStatus);
         }
+        // GET: Bookings/SearchByEmployeeAndDate
+        public async Task<IActionResult> SearchByEmployeeAndDate(int? employeeId, DateTime? startDate, DateTime? endDate)
+        {
+            // Заповнюємо ViewData для випадаючого списку співробітників та збереження параметрів
+            ViewData["EmployeeIdList"] = new SelectList(_context.Employees.Select(e => new { e.EmployeeId, FullName = e.FirstName + " " + e.LastName }), "EmployeeId", "FullName", employeeId);
+            ViewData["CurrentEmployeeId"] = employeeId;
+            ViewData["CurrentStartDate"] = startDate?.ToString("yyyy-MM-ddTHH:mm"); // Для datetime-local
+            ViewData["CurrentEndDate"] = endDate?.ToString("yyyy-MM-ddTHH:mm");     // Для datetime-local
+
+            if (_context.Bookings == null)
+            {
+                return Problem("Entity set 'TravelAgencyDbContext.Bookings' is null.");
+            }
+
+            var bookingsQuery = _context.Bookings
+                                      .Include(b => b.Client)
+                                      .Include(b => b.Tour)
+                                      .Include(b => b.Employee)
+                                      .AsQueryable();
+
+            bool hasParameters = false;
+
+            if (employeeId.HasValue && employeeId.Value > 0)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.EmployeeId == employeeId.Value);
+                hasParameters = true;
+            }
+
+            if (startDate.HasValue)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.BookingDate >= startDate.Value);
+                hasParameters = true;
+            }
+
+            if (endDate.HasValue)
+            {
+                // Додаємо один день до endDate, щоб включити весь день endDate
+                bookingsQuery = bookingsQuery.Where(b => b.BookingDate < endDate.Value.AddDays(1));
+                hasParameters = true;
+            }
+
+            List<Booking> bookingsResult;
+            if (hasParameters)
+            {
+                bookingsResult = await bookingsQuery.OrderByDescending(b => b.BookingDate).ToListAsync();
+            }
+            else
+            {
+               
+                bookingsResult = new List<Booking>();
+                if (employeeId.HasValue || startDate.HasValue || endDate.HasValue)
+                {
+                    
+                }
+                else
+                {
+                    ViewData["NoParametersMessage"] = "Будь ласка, оберіть співробітника та/або вкажіть діапазон дат для пошуку.";
+                }
+
+            }
+            return View(bookingsResult);
+        }
+
     }
 }

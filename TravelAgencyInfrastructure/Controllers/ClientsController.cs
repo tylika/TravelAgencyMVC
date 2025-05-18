@@ -57,8 +57,6 @@ namespace TravelAgencyInfrastructure.Controllers
 
             
             // 5. Перевірка на унікальність (Ім'я + Прізвище + Пошта + Телефон)
-            // Цю перевірку краще робити, якщо всі ці поля обов'язкові або хоча б деякі з них.
-            // Поки що зробимо перевірку, якщо Email або PhoneNumber заповнені.
             if (!string.IsNullOrEmpty(client.Email) || !string.IsNullOrEmpty(client.PhoneNumber))
             {
                 bool exists = await _context.Clients.AnyAsync(c =>
@@ -191,7 +189,53 @@ namespace TravelAgencyInfrastructure.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+        // GET: Clients/SearchActiveClients
+        public async Task<IActionResult> SearchActiveClients(string? searchTerm)
+        {
+            ViewData["CurrentSearchTerm"] = searchTerm;
 
+            if (_context.Clients == null)
+            {
+                return Problem("Entity set 'TravelAgencyDbContext.Clients' is null.");
+            }
+
+            // Починаємо з IQueryable<Client>
+            var clientsQuery = _context.Clients.AsQueryable();
+
+            // Фільтрація за searchTerm, якщо він є
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                clientsQuery = clientsQuery.Where(c =>
+                    (c.FirstName != null && c.FirstName.Contains(searchTerm)) ||
+                    (c.LastName != null && c.LastName.Contains(searchTerm))
+                );
+            }
+
+            // Фільтруємо клієнтів, щоб залишилися тільки ті, хто має хоча б одне бронювання
+            // Це явно використовує зв'язок з таблицею Bookings для фільтрації
+            clientsQuery = clientsQuery.Where(c => c.Bookings.Any());
+
+            // Тепер вибираємо дані, включаючи кількість бронювань
+            // Ми все ще можемо передати Client і розкрити Bookings.Count у View,
+            // або створити ViewModel. Для простоти залишаємо передачу Client з .Include().
+            var activeClients = await clientsQuery
+                                        .Include(c => c.Bookings) // Включаємо бронювання для підрахунку та, можливо, для деталей
+                                        .OrderBy(c => c.LastName).ThenBy(c => c.FirstName) // Сортування
+                                        .ToListAsync();
+
+            if (!activeClients.Any() && !string.IsNullOrEmpty(searchTerm))
+            {
+                ViewData["NoResultsMessage"] = "Активних клієнтів (з бронюваннями) за вашим запитом не знайдено.";
+            }
+            else if (!activeClients.Any() && string.IsNullOrEmpty(searchTerm))
+            {
+                // Якщо немає searchTerm і немає активних клієнтів взагалі
+                ViewData["NoResultsMessage"] = "Активних клієнтів (з бронюваннями) не знайдено.";
+            }
+
+
+            return View(activeClients); // Потрібно створити View Views/Clients/SearchActiveClients.cshtml
+        }
         private bool ClientExists(int id)
         {
             return _context.Clients.Any(e => e.ClientId == id);

@@ -1,0 +1,79 @@
+﻿@model IEnumerable<TravelAgencyDomain.Model.Booking>
+
+@{
+    ViewData["Title"] = "Пошук Бронювань за Співробітником та Датою";
+    var employeeIdList = ViewData["EmployeeIdList"] as SelectList;
+    string currentStartDate = ViewData["CurrentStartDate"] as string ?? "";
+    string currentEndDate = ViewData["CurrentEndDate"] as string ?? "";
+    string? noParamsMessage = ViewData["NoParametersMessage"] as string;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="SearchByEmployeeAndDate" method="get" class="mb-3">
+    <div class="row align-items-end">
+        <div class="col-md-3 form-group">
+            <label for="employeeId" class="control-label">Співробітник:</label>
+            <select name="employeeId" asp-items="employeeIdList" class="form-control">
+                <option value="">-- Всі співробітники --</option>
+            </select>
+        </div>
+        <div class="col-md-3 form-group">
+            <label for="startDate" class="control-label">З дати:</label>
+            <input type="datetime-local" name="startDate" value="@currentStartDate" class="form-control" step="60" />
+        </div>
+        <div class="col-md-3 form-group">
+            <label for="endDate" class="control-label">По дату:</label>
+            <input type="datetime-local" name="endDate" value="@currentEndDate" class="form-control" step="60" />
+        </div>
+        <div class="col-md-1 form-group">
+            <input type="submit" value="Пошук" class="btn btn-primary" />
+        </div>
+        <div class="col-md-2 form-group">
+            <a asp-action="SearchByEmployeeAndDate" class="btn btn-secondary">Скинути фільтри</a>
+        </div>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(noParamsMessage))
+{
+    <div class="alert alert-info">@noParamsMessage</div>
+}
+else if (Model != null && Model.Any())
+{
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Клієнт</th>
+                <th>Тур</th>
+                <th>Співробітник</th>
+                <th>@Html.DisplayNameFor(model => model.BookingDate)</th>
+                <th>@Html.DisplayNameFor(model => model.NumberOfPeople)</th>
+                <th>@Html.DisplayNameFor(model => model.TotalPrice)</th>
+                <th>@Html.DisplayNameFor(model => model.Status)</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Client?.FirstName @item.Client?.LastName</td>
+                    <td>@item.Tour?.TourName</td>
+                    <td>@item.Employee?.FirstName @item.Employee?.LastName</td>
+                    <td>@item.BookingDate.ToString("g")</td>
+                    <td>@Html.DisplayFor(modelItem => item.NumberOfPeople)</td>
+                    <td>@Html.DisplayFor(modelItem => item.TotalPrice)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.BookingId" class="btn btn-sm btn-outline-info">Деталі</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>За вашим запитом бронювань не знайдено.</p>
+}

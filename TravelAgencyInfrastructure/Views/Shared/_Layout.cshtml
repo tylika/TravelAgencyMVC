@@ -21,27 +21,28 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Головна</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Clients" asp-action="Index">Клієнти</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownCrud" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Довідники (CRUD)
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownCrud">
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Clients" asp-action="Index">Клієнти</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Countries" asp-action="Index">Країни</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Hotels" asp-action="Index">Готелі</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Tours" asp-action="Index">Тури</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Bookings" asp-action="Index">Бронювання</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Employees" asp-action="Index">Співробітники</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Reviews" asp-action="Index">Відгуки</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Countries" asp-action="Index">Країни</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="SimpleQueriesList">Прості Запити</a>
                         </li>
+                        @*
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Hotels" asp-action="Index">Готелі</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="ComplexQueriesList">Складні Запити</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Tours" asp-action="Index">Тури</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Bookings" asp-action="Index">Бронювання</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Employees" asp-action="Index">Співробітники</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Reviews" asp-action="Index">Відгуки</a>
-                        </li>
+                        *@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Конфіденційність</a>
                         </li>
