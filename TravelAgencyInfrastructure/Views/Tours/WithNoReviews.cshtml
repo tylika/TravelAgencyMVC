@@ -1,0 +1,73 @@
+﻿@model IEnumerable<TravelAgencyDomain.Model.Tour>
+
+@{
+    // ViewData["Title"] встановлюється в контролері
+    string? infoMessage = ViewData["InfoMessage"] as string;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!string.IsNullOrEmpty(infoMessage))
+{
+    <div class="alert alert-info">@infoMessage</div>
+}
+
+@if (Model != null && Model.Any())
+{
+    <p>Список турів, для яких ще не залишено жодного відгуку:</p>
+    <table class="table table-striped table-hover mt-3">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().TourName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().Country)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().Hotel)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().StartDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.FirstOrDefault().PricePerPerson)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TourName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Country.CountryName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Hotel.HotelName)
+                    </td>
+                    <td>
+                        @item.StartDate.ToString("dd.MM.yyyy")
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PricePerPerson)
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.TourId" class="btn btn-sm btn-outline-info">Деталі Туру</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (string.IsNullOrEmpty(infoMessage)) // Якщо не було infoMessage і модель порожня
+{
+    <p>Не знайдено турів без відгуків.</p>
+}
+
+<div class="mt-4">
+    <a asp-controller="Home" asp-action="ComplexQueriesList" class="btn btn-outline-secondary">До списку складних запитів</a>
+</div>

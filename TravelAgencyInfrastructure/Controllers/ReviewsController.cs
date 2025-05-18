@@ -71,7 +71,8 @@ namespace TravelAgencyInfrastructure.Controllers
             if (!await _context.Tours.AnyAsync(t => t.TourId == review.TourId))
                 ModelState.AddModelError("TourId", "Обраного туру не існує.");
 
-
+            ModelState.Remove("Tour");
+            ModelState.Remove("Client");
             if (ModelState.IsValid)
             {
                 if (review.ReviewDate == default(DateTime)) // Якщо дата не прийшла з форми, встановимо поточну
@@ -118,7 +119,8 @@ namespace TravelAgencyInfrastructure.Controllers
                 ModelState.AddModelError("ClientId", "Обраного клієнта не існує.");
             if (!await _context.Tours.AnyAsync(t => t.TourId == review.TourId))
                 ModelState.AddModelError("TourId", "Обраного туру не існує.");
-
+            ModelState.Remove("Tour");
+            ModelState.Remove("Client");
             if (ModelState.IsValid)
             {
                 try

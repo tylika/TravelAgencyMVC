@@ -29,7 +29,6 @@ public partial class Client
     public string? Email { get; set; }
     [Display(Name = "Дата народження")]
     [DataType(DataType.Date)]
-    //[AgeRange(18, 100, ErrorMessage = "Вік клієнта має бути від 18 до 100 років.")]
     public DateOnly? DateOfBirth { get; set; }
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
@@ -39,21 +38,20 @@ public partial class Client
     {
         if (dateOfBirth == null)
         {
-            // Ця перевірка вже покривається [Required], але для повноти
             return new ValidationResult("Дата народження є обов'язковим полем.");
         }
 
         var today = DateOnly.FromDateTime(DateTime.Today);
-        // За вашими вимогами: не менше 18 років та не більше 100
-        var minBirthDateFor18 = today.AddYears(-18); // Щоб було 18, дата народження має бути раніше або дорівнювати цій даті
-        var maxBirthDateFor100 = today.AddYears(-100); // Щоб було не більше 100, дата народження має бути пізніше або дорівнювати цій даті
+        
+        var minBirthDateFor18 = today.AddYears(-18); 
+        var maxBirthDateFor100 = today.AddYears(-100); 
 
-        if (dateOfBirth > minBirthDateFor18) // Якщо дата народження ПІЗНІШЕ -> молодше 18
+        if (dateOfBirth > minBirthDateFor18) 
         {
             return new ValidationResult($"Клієнту має бути щонайменше 18 років. Максимально допустима дата народження: {minBirthDateFor18:yyyy-MM-dd}.");
         }
 
-        if (dateOfBirth < maxBirthDateFor100) // Якщо дата народження РАНІШЕ -> старше 100
+        if (dateOfBirth < maxBirthDateFor100) 
         {
             return new ValidationResult($"Вік клієнта не може перевищувати 100 років. Мінімально допустима дата народження: {maxBirthDateFor100:yyyy-MM-dd}.");
         }

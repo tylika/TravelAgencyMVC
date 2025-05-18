@@ -14,9 +14,9 @@ public partial class Country
     public string CountryName { get; set; } = null!;
     [Display(Name = "Чи потрібна віза")]
     public bool VisaRequired { get; set; }
-    [Display(Name = "Континент")]
-    [StringLength(50, ErrorMessage = "Назва континенту не може перевищувати 50 символів.")]
-    [RegularExpression(@"^[^0-9]*$", ErrorMessage = "Назва континенту не може містити цифри.")]
+    [Display(Name = "Частина світу")]
+    [StringLength(50, ErrorMessage = "Назва частини світу не може перевищувати 50 символів.")]
+    [RegularExpression(@"^[^0-9]*$", ErrorMessage = "Назва частини світу не може містити цифри.")]
     public string? Continent { get; set; }
     [Display(Name = "Готель")]
     public virtual ICollection<Hotel> Hotels { get; set; } = new List<Hotel>();

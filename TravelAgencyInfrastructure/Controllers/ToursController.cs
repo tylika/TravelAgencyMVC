@@ -66,6 +66,9 @@ namespace TravelAgencyInfrastructure.Controllers
                 ModelState.AddModelError("HotelId", "Обраний готель не знаходиться в обраній країні.");
             }
 
+
+            ModelState.Remove("Country");
+            ModelState.Remove("Hotel");
             if (ModelState.IsValid)
             {
                 _context.Add(tour);
@@ -105,7 +108,8 @@ namespace TravelAgencyInfrastructure.Controllers
             {
                 ModelState.AddModelError("HotelId", "Обраний готель не знаходиться в обраній країні.");
             }
-
+            ModelState.Remove("Country");
+            ModelState.Remove("Hotel");
             if (ModelState.IsValid)
             {
                 try

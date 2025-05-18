@@ -1,0 +1,24 @@
+﻿@{
+    ViewData["Title"] = "Складні Запити (з множинними порівняннями)";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>Оберіть запит зі списку нижче:</p>
+
+<div class="list-group mt-4">
+    <a asp-controller="Home" asp-action="ClientsBookedAllToursInCountry" class="list-group-item list-group-item-action">
+        <strong>Запит 1:</strong> Клієнти, що забронювали ВСІ тури до вказаної країни
+    </a>
+    </a>
+    <a asp-controller="Home" asp-action="ClientsWithSameTourSetAsClient" class="list-group-item list-group-item-action">
+        <strong>Запит 2:</strong> Клієнти, що бронювали ТАКИЙ САМИЙ набір турів, як і вказаний клієнт
+    </a>
+    <a asp-controller="Home" asp-action="EmployeeBookingStatsByTourPrice" class="list-group-item list-group-item-action">
+        <strong>Запит 3:</strong> Співробітники та к-сть їх бронювань "дорогих" турів
+    </a>
+</div>
+
+<div class="mt-4">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Повернутися на Головну</a>
+</div>

@@ -44,12 +44,13 @@ namespace TravelAgencyInfrastructure.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CountryName,VisaRequired,Continent")] Country country)
         {
-            // Перевірка на унікальність назви країни (без урахування регістру)
+            // Перевірка на унікальність назви країни 
             if (await _context.Countries.AnyAsync(c => c.CountryName.ToLower() == country.CountryName.ToLower()))
             {
                 ModelState.AddModelError("CountryName", "Країна з такою назвою вже існує.");
             }
-
+            
+            ModelState.Remove("CountryName");
             if (ModelState.IsValid)
             {
                 _context.Add(country);
@@ -81,6 +82,7 @@ namespace TravelAgencyInfrastructure.Controllers
                 ModelState.AddModelError("CountryName", "Країна з такою назвою вже існує.");
             }
 
+            ModelState.Remove("CountryName");
             if (ModelState.IsValid)
             {
                 try

@@ -1,12 +1,12 @@
-﻿// Файл: TravelAgencyInfrastructure/Controllers/ClientsController.cs
+﻿
 using System;
-using System.Globalization; // Для CultureInfo
+using System.Globalization; 
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelAgencyDomain.Model;
-using TravelAgencyInfrastructure; // Ваш DbContext namespace
+using TravelAgencyInfrastructure; 
 
 namespace TravelAgencyInfrastructure.Controllers
 {
@@ -45,7 +45,7 @@ namespace TravelAgencyInfrastructure.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("FirstName,LastName,PhoneNumber,Email,DateOfBirth")] Client client)
         {
-            // 1. Автоматична зміна регістру для Ім'я та Прізвище
+            //  Автоматична зміна регістру для Ім'я та Прізвище
             if (!string.IsNullOrEmpty(client.FirstName))
             {
                 client.FirstName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(client.FirstName.ToLower());
@@ -56,7 +56,7 @@ namespace TravelAgencyInfrastructure.Controllers
             }
 
             
-            // 5. Перевірка на унікальність (Ім'я + Прізвище + Пошта + Телефон)
+            //  Перевірка на унікальність (Ім'я + Прізвище + Пошта + Телефон)
             if (!string.IsNullOrEmpty(client.Email) || !string.IsNullOrEmpty(client.PhoneNumber))
             {
                 bool exists = await _context.Clients.AnyAsync(c =>
@@ -70,7 +70,8 @@ namespace TravelAgencyInfrastructure.Controllers
                     ModelState.AddModelError(string.Empty, "Клієнт з таким Ім'ям, Прізвищем та контактними даними (пошта/телефон) вже існує.");
                 }
             }
-
+            ModelState.Remove("FirstName");
+            ModelState.Remove("LastName");
 
             if (ModelState.IsValid)
             {
@@ -97,7 +98,7 @@ namespace TravelAgencyInfrastructure.Controllers
         {
             if (id != client.ClientId) return NotFound();
 
-            // 1. Автоматична зміна регістру
+            // Автоматична зміна регістру
             if (!string.IsNullOrEmpty(client.FirstName))
             {
                 client.FirstName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(client.FirstName.ToLower());
@@ -107,7 +108,7 @@ namespace TravelAgencyInfrastructure.Controllers
                 client.LastName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(client.LastName.ToLower());
             }
 
-            // 4. Валідація дати народження
+            //  Валідація дати народження
             if (client.DateOfBirth.HasValue)
             {
                 var today = DateOnly.FromDateTime(DateTime.Today);
@@ -124,7 +125,7 @@ namespace TravelAgencyInfrastructure.Controllers
                 ModelState.AddModelError("DateOfBirth", "Дата народження є обов'язковою.");
             }
 
-            // 5. Перевірка на унікальність (окрім поточного запису)
+            // Перевірка на унікальність (окрім поточного запису)
             if (!string.IsNullOrEmpty(client.Email) || !string.IsNullOrEmpty(client.PhoneNumber))
             {
                 bool exists = await _context.Clients.AnyAsync(c =>
@@ -139,7 +140,8 @@ namespace TravelAgencyInfrastructure.Controllers
                     ModelState.AddModelError(string.Empty, "Інший клієнт з таким Ім'ям, Прізвищем та контактними даними (пошта/телефон) вже існує.");
                 }
             }
-
+            ModelState.Remove("FirstName");
+            ModelState.Remove("LastName");
             if (ModelState.IsValid)
             {
                 try
@@ -181,7 +183,7 @@ namespace TravelAgencyInfrastructure.Controllers
                 if (hasBookings || hasReviews)
                 {
                     ModelState.AddModelError(string.Empty, "Неможливо видалити клієнта, оскільки є пов'язані бронювання або відгуки.");
-                    // Потрібно передати модель назад у View, щоб відобразити помилку
+                    
                     return View("Delete", client);
                 }
                 _context.Clients.Remove(client);
@@ -202,7 +204,7 @@ namespace TravelAgencyInfrastructure.Controllers
             // Починаємо з IQueryable<Client>
             var clientsQuery = _context.Clients.AsQueryable();
 
-            // Фільтрація за searchTerm, якщо він є
+            // Фільтрація за searchTerm
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 clientsQuery = clientsQuery.Where(c =>
@@ -211,16 +213,11 @@ namespace TravelAgencyInfrastructure.Controllers
                 );
             }
 
-            // Фільтруємо клієнтів, щоб залишилися тільки ті, хто має хоча б одне бронювання
-            // Це явно використовує зв'язок з таблицею Bookings для фільтрації
             clientsQuery = clientsQuery.Where(c => c.Bookings.Any());
 
-            // Тепер вибираємо дані, включаючи кількість бронювань
-            // Ми все ще можемо передати Client і розкрити Bookings.Count у View,
-            // або створити ViewModel. Для простоти залишаємо передачу Client з .Include().
             var activeClients = await clientsQuery
-                                        .Include(c => c.Bookings) // Включаємо бронювання для підрахунку та, можливо, для деталей
-                                        .OrderBy(c => c.LastName).ThenBy(c => c.FirstName) // Сортування
+                                        .Include(c => c.Bookings) 
+                                        .OrderBy(c => c.LastName).ThenBy(c => c.FirstName) 
                                         .ToListAsync();
 
             if (!activeClients.Any() && !string.IsNullOrEmpty(searchTerm))
@@ -229,12 +226,12 @@ namespace TravelAgencyInfrastructure.Controllers
             }
             else if (!activeClients.Any() && string.IsNullOrEmpty(searchTerm))
             {
-                // Якщо немає searchTerm і немає активних клієнтів взагалі
+               
                 ViewData["NoResultsMessage"] = "Активних клієнтів (з бронюваннями) не знайдено.";
             }
 
 
-            return View(activeClients); // Потрібно створити View Views/Clients/SearchActiveClients.cshtml
+            return View(activeClients); 
         }
         private bool ClientExists(int id)
         {

@@ -60,7 +60,8 @@ namespace TravelAgencyInfrastructure.Controllers
                 ModelState.AddModelError("CountryId", "Обраної країни не існує.");
             }
 
-
+            ModelState.Remove("HotelName");
+            ModelState.Remove("Country");
             if (ModelState.IsValid)
             {
                 _context.Add(hotel);
@@ -98,7 +99,8 @@ namespace TravelAgencyInfrastructure.Controllers
             {
                 ModelState.AddModelError("CountryId", "Обраної країни не існує.");
             }
-
+            ModelState.Remove("HotelName");
+            ModelState.Remove("Country");
             if (ModelState.IsValid)
             {
                 try

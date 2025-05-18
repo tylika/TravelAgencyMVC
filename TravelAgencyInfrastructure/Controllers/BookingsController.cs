@@ -48,12 +48,7 @@ namespace TravelAgencyInfrastructure.Controllers
         // GET: Bookings/Create
         public IActionResult Create()
         {
-            // Готуємо дані для випадаючих списків
-            // Для Client та Employee краще показувати FirstName + LastName
-            // Потрібно додати властивість FullName до моделей Client та Employee або кастомний SelectList
-            // Поки що використовуємо те, що є у ваших моделях (FirstName).
-            // Якщо моделі не мають властивості FullName, вам потрібно буде її додати
-            // або створити SelectList з кастомним текстом.
+            
             ViewData["ClientId"] = new SelectList(_context.Clients.Select(c => new { c.ClientId, FullName = c.FirstName + " " + c.LastName }), "ClientId", "FullName");
             ViewData["EmployeeId"] = new SelectList(_context.Employees.Select(e => new { e.EmployeeId, FullName = e.FirstName + " " + e.LastName }), "EmployeeId", "FullName");
             ViewData["TourId"] = new SelectList(_context.Tours, "TourId", "TourName");
@@ -106,7 +101,10 @@ namespace TravelAgencyInfrastructure.Controllers
             {
                 ModelState.AddModelError("Status", "Обрано некоректний статус.");
             }
-
+            ModelState.Remove("Status");
+            ModelState.Remove("Client");
+            ModelState.Remove("Employee");
+            ModelState.Remove("Tour");
 
             if (ModelState.IsValid)
             {
@@ -173,7 +171,10 @@ namespace TravelAgencyInfrastructure.Controllers
             {
                 ModelState.AddModelError("Status", "Обрано некоректний статус.");
             }
-
+            ModelState.Remove("Status");
+            ModelState.Remove("Client");
+            ModelState.Remove("Employee");
+            ModelState.Remove("Tour");
             if (ModelState.IsValid)
             {
                 try

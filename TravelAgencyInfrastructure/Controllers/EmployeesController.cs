@@ -1,6 +1,6 @@
-﻿// Файл: TravelAgencyInfrastructure/Controllers/EmployeesController.cs
+﻿
 using System;
-using System.Globalization; // Для CultureInfo
+using System.Globalization; 
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -74,6 +74,8 @@ namespace TravelAgencyInfrastructure.Controllers
             }
 
 
+            ModelState.Remove("LastName");
+            ModelState.Remove("FirstName");
             if (ModelState.IsValid)
             {
                 _context.Add(employee);
@@ -126,7 +128,8 @@ namespace TravelAgencyInfrastructure.Controllers
             {
                 ModelState.AddModelError("PhoneNumber", "Інший співробітник з таким номером телефону вже існує.");
             }
-
+            ModelState.Remove("LastName");
+            ModelState.Remove("FirstName");
             if (ModelState.IsValid)
             {
                 try
@@ -166,7 +169,7 @@ namespace TravelAgencyInfrastructure.Controllers
                 if (hasBookings)
                 {
                     ModelState.AddModelError(string.Empty, "Неможливо видалити співробітника, оскільки за ним закріплені бронювання. Спочатку перепризначте або видаліть ці бронювання.");
-                    // Повторно завантажуємо дані для View
+                    
                     var employeeToDeleteView = await _context.Employees.FirstOrDefaultAsync(m => m.EmployeeId == id);
                     return View("Delete", employeeToDeleteView);
                 }
