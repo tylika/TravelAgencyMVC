@@ -1,43 +1,41 @@
 ﻿@model TravelAgencyDomain.Model.Country
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Створити країну";
 }
 
-<h1>Create</h1>
-
-<h4>Country</h4>
+<h1>Створити</h1>
+<h4>Країна</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="CountryName" class="control-label"></label>
-                <input asp-for="CountryName" class="form-control" />
+                <input asp-for="CountryName" class="form-control" placeholder="Наприклад, Україна" />
                 <span asp-validation-for="CountryName" class="text-danger"></span>
             </div>
-            <div class="form-group form-check">
+            <div class="form-group mb-3 form-check">
                 <label class="form-check-label">
                     <input class="form-check-input" asp-for="VisaRequired" /> @Html.DisplayNameFor(model => model.VisaRequired)
                 </label>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Continent" class="control-label"></label>
-                <input asp-for="Continent" class="form-control" />
+                <input asp-for="Continent" class="form-control" placeholder="Наприклад, Європа" />
                 <span asp-validation-for="Continent" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Створити" class="btn btn-primary" /> |
+                <a asp-action="Index" class="btn btn-secondary">Повернутися до списку</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

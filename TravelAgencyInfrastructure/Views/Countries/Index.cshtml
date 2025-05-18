@@ -1,15 +1,15 @@
 ﻿@model IEnumerable<TravelAgencyDomain.Model.Country>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Країни";
 }
 
-<h1>Index</h1>
+<h1>Країни</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Створити нову країну</a>
 </p>
-<table class="table">
+<table class="table table-striped table-hover">
     <thead>
         <tr>
             <th>
@@ -25,23 +25,24 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CountryName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.VisaRequired)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Continent)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.CountryId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.CountryId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.CountryId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CountryName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.VisaRequired)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Continent)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.CountryId" class="btn btn-sm btn-outline-primary">Редагувати</a> |
+                    <a asp-action="Details" asp-route-id="@item.CountryId" class="btn btn-sm btn-outline-info">Деталі</a> |
+                    <a asp-action="Delete" asp-route-id="@item.CountryId" class="btn btn-sm btn-outline-danger">Видалити</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

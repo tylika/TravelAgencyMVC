@@ -1,17 +1,26 @@
 ﻿@model IEnumerable<TravelAgencyDomain.Model.Booking>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Бронювання";
 }
 
-<h1>Index</h1>
+<h1>Бронювання</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Створити нове бронювання</a>
 </p>
-<table class="table">
+<table class="table table-striped table-hover">
     <thead>
         <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Client)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tour)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Employee)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.BookingDate)
             </th>
@@ -24,48 +33,40 @@
             <th>
                 @Html.DisplayNameFor(model => model.Status)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Client)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Employee)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Tour)
-            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.BookingDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NumberOfPeople)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TotalPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Client.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Employee.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Tour.TourName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.BookingId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.BookingId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.BookingId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Client.FirstName) @Html.DisplayFor(modelItem => item.Client.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Tour.TourName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Employee.FirstName) @Html.DisplayFor(modelItem => item.Employee.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BookingDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NumberOfPeople)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TotalPrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.BookingId" class="btn btn-sm btn-outline-primary">Редагувати</a> |
+                    <a asp-action="Details" asp-route-id="@item.BookingId" class="btn btn-sm btn-outline-info">Деталі</a> |
+                    <a asp-action="Delete" asp-route-id="@item.BookingId" class="btn btn-sm btn-outline-danger">Видалити</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

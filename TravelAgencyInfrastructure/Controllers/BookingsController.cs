@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Файл: TravelAgencyInfrastructure/Controllers/BookingsController.cs
+using System;
+using System.Collections.Generic; // Для List<SelectListItem>
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Rendering; // Для SelectList та SelectListItem
 using Microsoft.EntityFrameworkCore;
 using TravelAgencyDomain.Model;
 using TravelAgencyInfrastructure;
@@ -22,27 +23,24 @@ namespace TravelAgencyInfrastructure.Controllers
         // GET: Bookings
         public async Task<IActionResult> Index()
         {
-            var travelAgencyDbContext = _context.Bookings.Include(b => b.Client).Include(b => b.Employee).Include(b => b.Tour);
+            var travelAgencyDbContext = _context.Bookings
+                .Include(b => b.Client)
+                .Include(b => b.Employee)
+                .Include(b => b.Tour);
             return View(await travelAgencyDbContext.ToListAsync());
         }
 
         // GET: Bookings/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var booking = await _context.Bookings
                 .Include(b => b.Client)
                 .Include(b => b.Employee)
                 .Include(b => b.Tour)
                 .FirstOrDefaultAsync(m => m.BookingId == id);
-            if (booking == null)
-            {
-                return NotFound();
-            }
+            if (booking == null) return NotFound();
 
             return View(booking);
         }
@@ -50,60 +48,130 @@ namespace TravelAgencyInfrastructure.Controllers
         // GET: Bookings/Create
         public IActionResult Create()
         {
-            ViewData["ClientId"] = new SelectList(_context.Clients, "ClientId", "FirstName");
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "EmployeeId", "FirstName");
+            // Готуємо дані для випадаючих списків
+            // Для Client та Employee краще показувати FirstName + LastName
+            // Потрібно додати властивість FullName до моделей Client та Employee або кастомний SelectList
+            // Поки що використовуємо те, що є у ваших моделях (FirstName).
+            // Якщо моделі не мають властивості FullName, вам потрібно буде її додати
+            // або створити SelectList з кастомним текстом.
+            ViewData["ClientId"] = new SelectList(_context.Clients.Select(c => new { c.ClientId, FullName = c.FirstName + " " + c.LastName }), "ClientId", "FullName");
+            ViewData["EmployeeId"] = new SelectList(_context.Employees.Select(e => new { e.EmployeeId, FullName = e.FirstName + " " + e.LastName }), "EmployeeId", "FullName");
             ViewData["TourId"] = new SelectList(_context.Tours, "TourId", "TourName");
-            return View();
+
+            ViewData["StatusList"] = GetStatusSelectList();
+
+            var booking = new Booking
+            {
+                BookingDate = DateTime.Now // Встановлюємо поточну дату для нового бронювання
+            };
+            return View(booking);
         }
 
         // POST: Bookings/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BookingId,ClientId,TourId,EmployeeId,BookingDate,NumberOfPeople,TotalPrice,Status")] Booking booking)
+        public async Task<IActionResult> Create([Bind("ClientId,TourId,EmployeeId,BookingDate,NumberOfPeople,TotalPrice,Status")] Booking booking)
         {
+            // Валідація дати бронювання
+            if (booking.BookingDate < DateTime.Today.AddYears(-1) || booking.BookingDate > DateTime.Today.AddYears(1))
+            {
+                ModelState.AddModelError("BookingDate", "Дата бронювання має бути в межах одного року від поточної дати.");
+            }
+
+            var clientExists = await _context.Clients.AnyAsync(c => c.ClientId == booking.ClientId);
+            var tourExists = await _context.Tours.AnyAsync(t => t.TourId == booking.TourId);
+            var employeeExists = await _context.Employees.AnyAsync(e => e.EmployeeId == booking.EmployeeId);
+
+            if (!clientExists) ModelState.AddModelError("ClientId", "Обраного клієнта не існує.");
+            if (!tourExists) ModelState.AddModelError("TourId", "Обраного туру не існує.");
+            if (!employeeExists) ModelState.AddModelError("EmployeeId", "Обраного співробітника не існує.");
+
+            var tour = await _context.Tours.FindAsync(booking.TourId);
+            if (tour != null && booking.NumberOfPeople > 0)
+            {
+                // Розраховуємо TotalPrice тільки якщо воно не було встановлено (або = 0)
+                if (booking.TotalPrice == 0)
+                {
+                    booking.TotalPrice = tour.PricePerPerson * booking.NumberOfPeople;
+                }
+            }
+            else if (tour == null && ModelState.ContainsKey("TourId") && !ModelState["TourId"].Errors.Any()) // Якщо помилки по TourId ще не було
+            {
+                ModelState.AddModelError("TourId", "Не вдалося знайти тур для розрахунку ціни.");
+            }
+
+            // Перевірка, чи обраний статус є допустимим
+            var validStatuses = GetStatusSelectList().Select(s => s.Value);
+            if (!validStatuses.Contains(booking.Status))
+            {
+                ModelState.AddModelError("Status", "Обрано некоректний статус.");
+            }
+
+
             if (ModelState.IsValid)
             {
                 _context.Add(booking);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ClientId"] = new SelectList(_context.Clients, "ClientId", "FirstName", booking.ClientId);
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "EmployeeId", "FirstName", booking.EmployeeId);
+
+            ViewData["ClientId"] = new SelectList(_context.Clients.Select(c => new { c.ClientId, FullName = c.FirstName + " " + c.LastName }), "ClientId", "FullName", booking.ClientId);
+            ViewData["EmployeeId"] = new SelectList(_context.Employees.Select(e => new { e.EmployeeId, FullName = e.FirstName + " " + e.LastName }), "EmployeeId", "FullName", booking.EmployeeId);
             ViewData["TourId"] = new SelectList(_context.Tours, "TourId", "TourName", booking.TourId);
+            ViewData["StatusList"] = GetStatusSelectList(booking.Status);
             return View(booking);
         }
 
         // GET: Bookings/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null)
-            {
-                return NotFound();
-            }
-            ViewData["ClientId"] = new SelectList(_context.Clients, "ClientId", "FirstName", booking.ClientId);
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "EmployeeId", "FirstName", booking.EmployeeId);
+            if (booking == null) return NotFound();
+
+            ViewData["ClientId"] = new SelectList(_context.Clients.Select(c => new { c.ClientId, FullName = c.FirstName + " " + c.LastName }), "ClientId", "FullName", booking.ClientId);
+            ViewData["EmployeeId"] = new SelectList(_context.Employees.Select(e => new { e.EmployeeId, FullName = e.FirstName + " " + e.LastName }), "EmployeeId", "FullName", booking.EmployeeId);
             ViewData["TourId"] = new SelectList(_context.Tours, "TourId", "TourName", booking.TourId);
+            ViewData["StatusList"] = GetStatusSelectList(booking.Status);
             return View(booking);
         }
 
         // POST: Bookings/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("BookingId,ClientId,TourId,EmployeeId,BookingDate,NumberOfPeople,TotalPrice,Status")] Booking booking)
         {
-            if (id != booking.BookingId)
+            if (id != booking.BookingId) return NotFound();
+
+            if (booking.BookingDate < DateTime.Today.AddYears(-1) || booking.BookingDate > DateTime.Today.AddYears(1))
             {
-                return NotFound();
+                ModelState.AddModelError("BookingDate", "Дата бронювання має бути в межах одного року від поточної дати.");
+            }
+            if (!await _context.Clients.AnyAsync(c => c.ClientId == booking.ClientId))
+                ModelState.AddModelError("ClientId", "Обраного клієнта не існує.");
+            if (!await _context.Tours.AnyAsync(t => t.TourId == booking.TourId))
+                ModelState.AddModelError("TourId", "Обраного туру не існує.");
+            if (!await _context.Employees.AnyAsync(e => e.EmployeeId == booking.EmployeeId))
+                ModelState.AddModelError("EmployeeId", "Обраного співробітника не існує.");
+
+            var tour = await _context.Tours.FindAsync(booking.TourId);
+            if (tour != null && booking.NumberOfPeople > 0)
+            {
+                if (booking.TotalPrice == 0)
+                {
+                    booking.TotalPrice = tour.PricePerPerson * booking.NumberOfPeople;
+                }
+            }
+            else if (tour == null && ModelState.ContainsKey("TourId") && !ModelState["TourId"].Errors.Any())
+            {
+                ModelState.AddModelError("TourId", "Не вдалося знайти тур для розрахунку ціни.");
+            }
+
+            var validStatuses = GetStatusSelectList().Select(s => s.Value);
+            if (!validStatuses.Contains(booking.Status))
+            {
+                ModelState.AddModelError("Status", "Обрано некоректний статус.");
             }
 
             if (ModelState.IsValid)
@@ -115,41 +183,28 @@ namespace TravelAgencyInfrastructure.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!BookingExists(booking.BookingId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!BookingExists(booking.BookingId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ClientId"] = new SelectList(_context.Clients, "ClientId", "FirstName", booking.ClientId);
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "EmployeeId", "FirstName", booking.EmployeeId);
+            ViewData["ClientId"] = new SelectList(_context.Clients.Select(c => new { c.ClientId, FullName = c.FirstName + " " + c.LastName }), "ClientId", "FullName", booking.ClientId);
+            ViewData["EmployeeId"] = new SelectList(_context.Employees.Select(e => new { e.EmployeeId, FullName = e.FirstName + " " + e.LastName }), "EmployeeId", "FullName", booking.EmployeeId);
             ViewData["TourId"] = new SelectList(_context.Tours, "TourId", "TourName", booking.TourId);
+            ViewData["StatusList"] = GetStatusSelectList(booking.Status);
             return View(booking);
         }
 
         // GET: Bookings/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var booking = await _context.Bookings
                 .Include(b => b.Client)
                 .Include(b => b.Employee)
                 .Include(b => b.Tour)
                 .FirstOrDefaultAsync(m => m.BookingId == id);
-            if (booking == null)
-            {
-                return NotFound();
-            }
-
+            if (booking == null) return NotFound();
             return View(booking);
         }
 
@@ -162,15 +217,28 @@ namespace TravelAgencyInfrastructure.Controllers
             if (booking != null)
             {
                 _context.Bookings.Remove(booking);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool BookingExists(int id)
         {
             return _context.Bookings.Any(e => e.BookingId == id);
+        }
+
+        // Допоміжний метод для створення списку статусів
+        private SelectList GetStatusSelectList(string? selectedStatus = null)
+        {
+            var statuses = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "PendingPayment", Text = "Очікує оплати" },
+                new SelectListItem { Value = "Confirmed", Text = "Підтверджено" },
+                new SelectListItem { Value = "Cancelled", Text = "Скасовано" },
+                new SelectListItem { Value = "Completed", Text = "Завершено" }
+                // Додайте інші статуси, якщо потрібно
+            };
+            return new SelectList(statuses, "Value", "Text", selectedStatus);
         }
     }
 }

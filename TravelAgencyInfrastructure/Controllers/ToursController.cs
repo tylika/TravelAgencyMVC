@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Файл: TravelAgencyInfrastructure/Controllers/ToursController.cs
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -22,27 +22,21 @@ namespace TravelAgencyInfrastructure.Controllers
         // GET: Tours
         public async Task<IActionResult> Index()
         {
-            var travelAgencyDbContext = _context.Tours.Include(t => t.Country).Include(t => t.Hotel);
-            return View(await travelAgencyDbContext.ToListAsync());
+            var tours = _context.Tours
+                .Include(t => t.Country)
+                .Include(t => t.Hotel);
+            return View(await tours.ToListAsync());
         }
 
         // GET: Tours/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var tour = await _context.Tours
                 .Include(t => t.Country)
                 .Include(t => t.Hotel)
                 .FirstOrDefaultAsync(m => m.TourId == id);
-            if (tour == null)
-            {
-                return NotFound();
-            }
-
+            if (tour == null) return NotFound();
             return View(tour);
         }
 
@@ -55,12 +49,23 @@ namespace TravelAgencyInfrastructure.Controllers
         }
 
         // POST: Tours/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TourId,TourName,CountryId,HotelId,StartDate,DurationDays,PricePerPerson,TransportType,Description,MaxParticipants")] Tour tour)
+        public async Task<IActionResult> Create([Bind("TourName,CountryId,HotelId,StartDate,DurationDays,PricePerPerson,TransportType,Description,MaxParticipants")] Tour tour)
         {
+            // Валідація StartDate: не може бути в минулому
+            if (tour.StartDate < DateTime.Today) // Порівнюємо тільки дату, без часу
+            {
+                ModelState.AddModelError("StartDate", "Дата початку туру не може бути в минулому.");
+            }
+
+            // Додаткова перевірка, чи обраний готель належить обраній країні (опціонально, але логічно)
+            var hotel = await _context.Hotels.FindAsync(tour.HotelId);
+            if (hotel != null && hotel.CountryId != tour.CountryId)
+            {
+                ModelState.AddModelError("HotelId", "Обраний готель не знаходиться в обраній країні.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(tour);
@@ -68,38 +73,37 @@ namespace TravelAgencyInfrastructure.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CountryId"] = new SelectList(_context.Countries, "CountryId", "CountryName", tour.CountryId);
-            ViewData["HotelId"] = new SelectList(_context.Hotels, "HotelId", "HotelName", tour.HotelId);
+            // Фільтруємо готелі за обраною країною, якщо країна обрана
+            ViewData["HotelId"] = new SelectList(_context.Hotels.Where(h => h.CountryId == tour.CountryId), "HotelId", "HotelName", tour.HotelId);
             return View(tour);
         }
 
         // GET: Tours/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var tour = await _context.Tours.FindAsync(id);
-            if (tour == null)
-            {
-                return NotFound();
-            }
+            if (tour == null) return NotFound();
             ViewData["CountryId"] = new SelectList(_context.Countries, "CountryId", "CountryName", tour.CountryId);
-            ViewData["HotelId"] = new SelectList(_context.Hotels, "HotelId", "HotelName", tour.HotelId);
+            ViewData["HotelId"] = new SelectList(_context.Hotels.Where(h => h.CountryId == tour.CountryId), "HotelId", "HotelName", tour.HotelId); // Фільтр готелів
             return View(tour);
         }
 
         // POST: Tours/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("TourId,TourName,CountryId,HotelId,StartDate,DurationDays,PricePerPerson,TransportType,Description,MaxParticipants")] Tour tour)
         {
-            if (id != tour.TourId)
+            if (id != tour.TourId) return NotFound();
+
+            if (tour.StartDate < DateTime.Today)
             {
-                return NotFound();
+                ModelState.AddModelError("StartDate", "Дата початку туру не може бути в минулому.");
+            }
+            var hotel = await _context.Hotels.FindAsync(tour.HotelId);
+            if (hotel != null && hotel.CountryId != tour.CountryId)
+            {
+                ModelState.AddModelError("HotelId", "Обраний готель не знаходиться в обраній країні.");
             }
 
             if (ModelState.IsValid)
@@ -111,39 +115,25 @@ namespace TravelAgencyInfrastructure.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TourExists(tour.TourId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!TourExists(tour.TourId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CountryId"] = new SelectList(_context.Countries, "CountryId", "CountryName", tour.CountryId);
-            ViewData["HotelId"] = new SelectList(_context.Hotels, "HotelId", "HotelName", tour.HotelId);
+            ViewData["HotelId"] = new SelectList(_context.Hotels.Where(h => h.CountryId == tour.CountryId), "HotelId", "HotelName", tour.HotelId);
             return View(tour);
         }
 
         // GET: Tours/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var tour = await _context.Tours
                 .Include(t => t.Country)
                 .Include(t => t.Hotel)
                 .FirstOrDefaultAsync(m => m.TourId == id);
-            if (tour == null)
-            {
-                return NotFound();
-            }
-
+            if (tour == null) return NotFound();
             return View(tour);
         }
 
@@ -155,10 +145,21 @@ namespace TravelAgencyInfrastructure.Controllers
             var tour = await _context.Tours.FindAsync(id);
             if (tour != null)
             {
+                bool hasBookings = await _context.Bookings.AnyAsync(b => b.TourId == id);
+                bool hasReviews = await _context.Reviews.AnyAsync(r => r.TourId == id);
+                if (hasBookings || hasReviews)
+                {
+                    ModelState.AddModelError(string.Empty, "Неможливо видалити тур. Існують пов'язані бронювання або відгуки.");
+                    // Повторно завантажуємо дані для View
+                    var tourToDeleteView = await _context.Tours
+                        .Include(t => t.Country)
+                        .Include(t => t.Hotel)
+                        .FirstOrDefaultAsync(m => m.TourId == id);
+                    return View("Delete", tourToDeleteView);
+                }
                 _context.Tours.Remove(tour);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

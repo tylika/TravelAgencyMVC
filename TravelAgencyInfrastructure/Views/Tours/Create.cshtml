@@ -1,71 +1,89 @@
 ﻿@model TravelAgencyDomain.Model.Tour
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Створити тур";
 }
 
-<h1>Create</h1>
-
-<h4>Tour</h4>
+<h1>Створити</h1>
+<h4>Тур</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="TourName" class="control-label"></label>
-                <input asp-for="TourName" class="form-control" />
+                <input asp-for="TourName" class="form-control" placeholder="Наприклад, Відпочинок на Мальдівах" />
                 <span asp-validation-for="TourName" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="CountryId" class="control-label"></label>
-                <select asp-for="CountryId" class ="form-control" asp-items="ViewBag.CountryId"></select>
+                <select asp-for="CountryId" class="form-control" asp-items="ViewBag.CountryId">
+                    <option value="">-- Оберіть країну --</option>
+                </select>
+                <span asp-validation-for="CountryId" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="HotelId" class="control-label"></label>
-                <select asp-for="HotelId" class ="form-control" asp-items="ViewBag.HotelId"></select>
+                <select asp-for="HotelId" class="form-control" asp-items="ViewBag.HotelId">
+                    <option value="">-- Оберіть готель --</option>
+                </select>
+                <span asp-validation-for="HotelId" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="StartDate" class="control-label"></label>
-                <input asp-for="StartDate" class="form-control" />
+                <input asp-for="StartDate" class="form-control" type="datetime-local" step="60" />
                 <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="DurationDays" class="control-label"></label>
-                <input asp-for="DurationDays" class="form-control" />
+                <input asp-for="DurationDays" class="form-control" placeholder="Наприклад, 7" />
                 <span asp-validation-for="DurationDays" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="PricePerPerson" class="control-label"></label>
-                <input asp-for="PricePerPerson" class="form-control" />
+                <input asp-for="PricePerPerson" class="form-control" placeholder="Наприклад, 15000.00" />
                 <span asp-validation-for="PricePerPerson" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="TransportType" class="control-label"></label>
-                <input asp-for="TransportType" class="form-control" />
+                <input asp-for="TransportType" class="form-control" placeholder="Наприклад, Авіа" />
                 <span asp-validation-for="TransportType" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Детальний опис туру..."></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="MaxParticipants" class="control-label"></label>
-                <input asp-for="MaxParticipants" class="form-control" />
+                <input asp-for="MaxParticipants" class="form-control" placeholder="Наприклад, 20" />
                 <span asp-validation-for="MaxParticipants" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Створити" class="btn btn-primary" /> |
+                <a asp-action="Index" class="btn btn-secondary">Повернутися до списку</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#CountryId").change(function () {
+                var countryId = $(this).val();
+                var hotelSelect = $("#HotelId");
+                hotelSelect.empty();
+                hotelSelect.append($('<option/>', { value: '', text: '-- Оберіть готель --' }));
+                if (countryId) {
+                    // Для динамічного завантаження потрібен AJAX, поки що не реалізовано
+                    console.log("Country changed to: " + countryId + ". Dynamic hotel loading would go here.");
+                }
+            });
+        });
+    </script>
 }

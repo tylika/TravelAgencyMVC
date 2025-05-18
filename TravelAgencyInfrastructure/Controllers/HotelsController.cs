@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Файл: TravelAgencyInfrastructure/Controllers/HotelsController.cs
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -29,19 +29,11 @@ namespace TravelAgencyInfrastructure.Controllers
         // GET: Hotels/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var hotel = await _context.Hotels
                 .Include(h => h.Country)
                 .FirstOrDefaultAsync(m => m.HotelId == id);
-            if (hotel == null)
-            {
-                return NotFound();
-            }
-
+            if (hotel == null) return NotFound();
             return View(hotel);
         }
 
@@ -53,12 +45,22 @@ namespace TravelAgencyInfrastructure.Controllers
         }
 
         // POST: Hotels/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("HotelId,HotelName,CountryId,City,StarRating,Address,Description")] Hotel hotel)
+        public async Task<IActionResult> Create([Bind("HotelName,CountryId,City,StarRating,Address,Description")] Hotel hotel)
         {
+            // Перевірка на унікальність назви готелю в межах обраної країни
+            if (await _context.Hotels.AnyAsync(h => h.HotelName.ToLower() == hotel.HotelName.ToLower() && h.CountryId == hotel.CountryId))
+            {
+                ModelState.AddModelError("HotelName", "Готель з такою назвою вже існує в обраній країні.");
+            }
+
+            if (!await _context.Countries.AnyAsync(c => c.CountryId == hotel.CountryId))
+            {
+                ModelState.AddModelError("CountryId", "Обраної країни не існує.");
+            }
+
+
             if (ModelState.IsValid)
             {
                 _context.Add(hotel);
@@ -72,30 +74,29 @@ namespace TravelAgencyInfrastructure.Controllers
         // GET: Hotels/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var hotel = await _context.Hotels.FindAsync(id);
-            if (hotel == null)
-            {
-                return NotFound();
-            }
+            if (hotel == null) return NotFound();
             ViewData["CountryId"] = new SelectList(_context.Countries, "CountryId", "CountryName", hotel.CountryId);
             return View(hotel);
         }
 
         // POST: Hotels/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("HotelId,HotelName,CountryId,City,StarRating,Address,Description")] Hotel hotel)
         {
-            if (id != hotel.HotelId)
+            if (id != hotel.HotelId) return NotFound();
+
+            // Перевірка на унікальність назви готелю в межах обраної країни (крім поточного готелю)
+            if (await _context.Hotels.AnyAsync(h => h.HotelId != hotel.HotelId && h.HotelName.ToLower() == hotel.HotelName.ToLower() && h.CountryId == hotel.CountryId))
             {
-                return NotFound();
+                ModelState.AddModelError("HotelName", "Інший готель з такою назвою вже існує в обраній країні.");
+            }
+
+            if (!await _context.Countries.AnyAsync(c => c.CountryId == hotel.CountryId))
+            {
+                ModelState.AddModelError("CountryId", "Обраної країни не існує.");
             }
 
             if (ModelState.IsValid)
@@ -107,14 +108,8 @@ namespace TravelAgencyInfrastructure.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!HotelExists(hotel.HotelId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!HotelExists(hotel.HotelId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -125,19 +120,11 @@ namespace TravelAgencyInfrastructure.Controllers
         // GET: Hotels/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var hotel = await _context.Hotels
                 .Include(h => h.Country)
                 .FirstOrDefaultAsync(m => m.HotelId == id);
-            if (hotel == null)
-            {
-                return NotFound();
-            }
-
+            if (hotel == null) return NotFound();
             return View(hotel);
         }
 
@@ -149,10 +136,17 @@ namespace TravelAgencyInfrastructure.Controllers
             var hotel = await _context.Hotels.FindAsync(id);
             if (hotel != null)
             {
+                // Перевірка на пов'язані тури
+                bool hasTours = await _context.Tours.AnyAsync(t => t.HotelId == id);
+                if (hasTours)
+                {
+                    ModelState.AddModelError(string.Empty, "Неможливо видалити готель, оскільки він використовується в турах. Спочатку видаліть або перепризначте ці тури.");
+                    var hotelToDeleteView = await _context.Hotels.Include(h => h.Country).FirstOrDefaultAsync(m => m.HotelId == id);
+                    return View("Delete", hotelToDeleteView);
+                }
                 _context.Hotels.Remove(hotel);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

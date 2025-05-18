@@ -1,13 +1,13 @@
 ﻿@model TravelAgencyDomain.Model.Country
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Деталі";
 }
 
-<h1>Details</h1>
+<h1>Деталі</h1>
 
 <div>
-    <h4>Country</h4>
+    <h4>Країни</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -31,6 +31,6 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.CountryId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.CountryId">Редагувати</a> |
+    <a asp-action="Index">Повернутись назад</a>
 </div>

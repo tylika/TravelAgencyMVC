@@ -1,19 +1,25 @@
 ﻿@model IEnumerable<TravelAgencyDomain.Model.Tour>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Тури";
 }
 
-<h1>Index</h1>
+<h1>Тури</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Створити новий тур</a>
 </p>
-<table class="table">
+<table class="table table-striped table-hover">
     <thead>
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.TourName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Country)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Hotel)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.StartDate)
@@ -27,57 +33,56 @@
             <th>
                 @Html.DisplayNameFor(model => model.TransportType)
             </th>
+            @* Можна приховати опис у списку, якщо він задовгий
             <th>
                 @Html.DisplayNameFor(model => model.Description)
             </th>
+            *@
             <th>
                 @Html.DisplayNameFor(model => model.MaxParticipants)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Country)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Hotel)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.TourName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DurationDays)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PricePerPerson)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TransportType)
-            </td>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TourName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Country.CountryName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Hotel.HotelName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DurationDays)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PricePerPerson)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TransportType)
+                </td>
+                @*
             <td>
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MaxParticipants)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Country.CountryName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Hotel.HotelName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.TourId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.TourId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.TourId">Delete</a>
-            </td>
-        </tr>
-}
+            *@
+                <td>
+                    @Html.DisplayFor(modelItem => item.MaxParticipants)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.TourId" class="btn btn-sm btn-outline-primary">Редагувати</a> |
+                    <a asp-action="Details" asp-route-id="@item.TourId" class="btn btn-sm btn-outline-info">Деталі</a> |
+                    <a asp-action="Delete" asp-route-id="@item.TourId" class="btn btn-sm btn-outline-danger">Видалити</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

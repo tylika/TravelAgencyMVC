@@ -1,17 +1,23 @@
 ﻿@model IEnumerable<TravelAgencyDomain.Model.Review>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Відгуки";
 }
 
-<h1>Index</h1>
+<h1>Відгуки</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Залишити новий відгук</a>
 </p>
-<table class="table">
+<table class="table table-striped table-hover">
     <thead>
         <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Tour)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Client)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.Rating)
             </th>
@@ -21,39 +27,34 @@
             <th>
                 @Html.DisplayNameFor(model => model.ReviewDate)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Client)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Tour)
-            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Rating)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CommentText)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReviewDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Client.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Tour.TourName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ReviewId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ReviewId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ReviewId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Tour.TourName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Client.FirstName) @Html.DisplayFor(modelItem => item.Client.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Rating)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CommentText)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ReviewDate)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ReviewId" class="btn btn-sm btn-outline-primary">Редагувати</a> |
+                    <a asp-action="Details" asp-route-id="@item.ReviewId" class="btn btn-sm btn-outline-info">Деталі</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ReviewId" class="btn btn-sm btn-outline-danger">Видалити</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Файл: TravelAgencyInfrastructure/Controllers/ClientsController.cs
+using System;
+using System.Globalization; // Для CultureInfo
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TravelAgencyDomain.Model;
-using TravelAgencyInfrastructure;
+using TravelAgencyInfrastructure; // Ваш DbContext namespace
 
 namespace TravelAgencyInfrastructure.Controllers
 {
@@ -28,18 +28,9 @@ namespace TravelAgencyInfrastructure.Controllers
         // GET: Clients/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var client = await _context.Clients
-                .FirstOrDefaultAsync(m => m.ClientId == id);
-            if (client == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
+            var client = await _context.Clients.FirstOrDefaultAsync(m => m.ClientId == id);
+            if (client == null) return NotFound();
             return View(client);
         }
 
@@ -50,12 +41,39 @@ namespace TravelAgencyInfrastructure.Controllers
         }
 
         // POST: Clients/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ClientId,FirstName,LastName,PhoneNumber,Email,DateOfBirth")] Client client)
+        public async Task<IActionResult> Create([Bind("FirstName,LastName,PhoneNumber,Email,DateOfBirth")] Client client)
         {
+            // 1. Автоматична зміна регістру для Ім'я та Прізвище
+            if (!string.IsNullOrEmpty(client.FirstName))
+            {
+                client.FirstName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(client.FirstName.ToLower());
+            }
+            if (!string.IsNullOrEmpty(client.LastName))
+            {
+                client.LastName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(client.LastName.ToLower());
+            }
+
+            
+            // 5. Перевірка на унікальність (Ім'я + Прізвище + Пошта + Телефон)
+            // Цю перевірку краще робити, якщо всі ці поля обов'язкові або хоча б деякі з них.
+            // Поки що зробимо перевірку, якщо Email або PhoneNumber заповнені.
+            if (!string.IsNullOrEmpty(client.Email) || !string.IsNullOrEmpty(client.PhoneNumber))
+            {
+                bool exists = await _context.Clients.AnyAsync(c =>
+                    c.FirstName == client.FirstName &&
+                    c.LastName == client.LastName &&
+                    ((!string.IsNullOrEmpty(client.Email) && c.Email == client.Email) ||
+                     (!string.IsNullOrEmpty(client.PhoneNumber) && c.PhoneNumber == client.PhoneNumber))
+                );
+                if (exists)
+                {
+                    ModelState.AddModelError(string.Empty, "Клієнт з таким Ім'ям, Прізвищем та контактними даними (пошта/телефон) вже існує.");
+                }
+            }
+
+
             if (ModelState.IsValid)
             {
                 _context.Add(client);
@@ -68,29 +86,60 @@ namespace TravelAgencyInfrastructure.Controllers
         // GET: Clients/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var client = await _context.Clients.FindAsync(id);
-            if (client == null)
-            {
-                return NotFound();
-            }
+            if (client == null) return NotFound();
             return View(client);
         }
 
         // POST: Clients/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ClientId,FirstName,LastName,PhoneNumber,Email,DateOfBirth")] Client client)
         {
-            if (id != client.ClientId)
+            if (id != client.ClientId) return NotFound();
+
+            // 1. Автоматична зміна регістру
+            if (!string.IsNullOrEmpty(client.FirstName))
             {
-                return NotFound();
+                client.FirstName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(client.FirstName.ToLower());
+            }
+            if (!string.IsNullOrEmpty(client.LastName))
+            {
+                client.LastName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(client.LastName.ToLower());
+            }
+
+            // 4. Валідація дати народження
+            if (client.DateOfBirth.HasValue)
+            {
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                var age = today.Year - client.DateOfBirth.Value.Year;
+                if (client.DateOfBirth.Value > today.AddYears(-age)) age--;
+
+                if (age < 18 || age > 100)
+                {
+                    ModelState.AddModelError("DateOfBirth", "Вік клієнта має бути від 18 до 100 років.");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("DateOfBirth", "Дата народження є обов'язковою.");
+            }
+
+            // 5. Перевірка на унікальність (окрім поточного запису)
+            if (!string.IsNullOrEmpty(client.Email) || !string.IsNullOrEmpty(client.PhoneNumber))
+            {
+                bool exists = await _context.Clients.AnyAsync(c =>
+                    c.ClientId != client.ClientId && // Ігноруємо поточний запис
+                    c.FirstName == client.FirstName &&
+                    c.LastName == client.LastName &&
+                    ((!string.IsNullOrEmpty(client.Email) && c.Email == client.Email) ||
+                     (!string.IsNullOrEmpty(client.PhoneNumber) && c.PhoneNumber == client.PhoneNumber))
+                );
+                if (exists)
+                {
+                    ModelState.AddModelError(string.Empty, "Інший клієнт з таким Ім'ям, Прізвищем та контактними даними (пошта/телефон) вже існує.");
+                }
             }
 
             if (ModelState.IsValid)
@@ -102,14 +151,8 @@ namespace TravelAgencyInfrastructure.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClientExists(client.ClientId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!ClientExists(client.ClientId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -119,18 +162,9 @@ namespace TravelAgencyInfrastructure.Controllers
         // GET: Clients/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var client = await _context.Clients
-                .FirstOrDefaultAsync(m => m.ClientId == id);
-            if (client == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
+            var client = await _context.Clients.FirstOrDefaultAsync(m => m.ClientId == id);
+            if (client == null) return NotFound();
             return View(client);
         }
 
@@ -142,10 +176,19 @@ namespace TravelAgencyInfrastructure.Controllers
             var client = await _context.Clients.FindAsync(id);
             if (client != null)
             {
-                _context.Clients.Remove(client);
-            }
+                // Перевірка на пов'язані бронювання або відгуки
+                bool hasBookings = await _context.Bookings.AnyAsync(b => b.ClientId == id);
+                bool hasReviews = await _context.Reviews.AnyAsync(r => r.ClientId == id);
 
-            await _context.SaveChangesAsync();
+                if (hasBookings || hasReviews)
+                {
+                    ModelState.AddModelError(string.Empty, "Неможливо видалити клієнта, оскільки є пов'язані бронювання або відгуки.");
+                    // Потрібно передати модель назад у View, щоб відобразити помилку
+                    return View("Delete", client);
+                }
+                _context.Clients.Remove(client);
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

@@ -1,55 +1,69 @@
 ﻿@model TravelAgencyDomain.Model.Booking
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Створити бронювання";
 }
 
-<h1>Create</h1>
-
-<h4>Booking</h4>
+<h1>Створити</h1>
+<h4>Бронювання</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="ClientId" class="control-label"></label>
-                <select asp-for="ClientId" class ="form-control" asp-items="ViewBag.ClientId"></select>
+                <select asp-for="ClientId" class="form-control" asp-items="ViewBag.ClientId">
+                    <option value="">-- Оберіть клієнта --</option>
+                </select>
+                <span asp-validation-for="ClientId" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="TourId" class="control-label"></label>
-                <select asp-for="TourId" class ="form-control" asp-items="ViewBag.TourId"></select>
+                <select asp-for="TourId" class="form-control" asp-items="ViewBag.TourId">
+                    <option value="">-- Оберіть тур --</option>
+                </select>
+                <span asp-validation-for="TourId" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="EmployeeId" class="control-label"></label>
-                <select asp-for="EmployeeId" class ="form-control" asp-items="ViewBag.EmployeeId"></select>
+                <select asp-for="EmployeeId" class="form-control" asp-items="ViewBag.EmployeeId">
+                    <option value="">-- Оберіть співробітника --</option>
+                </select>
+                <span asp-validation-for="EmployeeId" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
+                <label asp-for="BookingDate" class="control-label"></label>
+                <input asp-for="BookingDate" class="form-control" type="datetime-local" step="60" />
+                <span asp-validation-for="BookingDate" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
                 <label asp-for="NumberOfPeople" class="control-label"></label>
-                <input asp-for="NumberOfPeople" class="form-control" />
+                <input asp-for="NumberOfPeople" class="form-control" placeholder="Наприклад, 2" />
                 <span asp-validation-for="NumberOfPeople" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="TotalPrice" class="control-label"></label>
-                <input asp-for="TotalPrice" class="form-control" />
+                <input asp-for="TotalPrice" class="form-control" placeholder="Буде розраховано або введіть" />
                 <span asp-validation-for="TotalPrice" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Status" class="control-label"></label>
-                <input asp-for="Status" class="form-control" />
+                <select asp-for="Status" class="form-control" asp-items="ViewBag.StatusList">
+                    <option value="">-- Оберіть статус --</option>
+                </select>
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Створити" class="btn btn-primary" /> |
+                <a asp-action="Index" class="btn btn-secondary">Повернутися до списку</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

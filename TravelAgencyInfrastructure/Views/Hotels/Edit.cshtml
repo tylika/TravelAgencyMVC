@@ -1,59 +1,57 @@
 ﻿@model TravelAgencyDomain.Model.Hotel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Редагувати готель";
 }
 
-<h1>Edit</h1>
-
-<h4>Hotel</h4>
+<h1>Редагувати</h1>
+<h4>Готель</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="HotelId" />
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="HotelName" class="control-label"></label>
-                <input asp-for="HotelName" class="form-control" />
+                <input asp-for="HotelName" class="form-control" placeholder="Наприклад, Rixos" />
                 <span asp-validation-for="HotelName" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="CountryId" class="control-label"></label>
                 <select asp-for="CountryId" class="form-control" asp-items="ViewBag.CountryId"></select>
                 <span asp-validation-for="CountryId" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="City" class="control-label"></label>
-                <input asp-for="City" class="form-control" />
+                <input asp-for="City" class="form-control" placeholder="Наприклад, Анталія" />
                 <span asp-validation-for="City" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="StarRating" class="control-label"></label>
-                <input asp-for="StarRating" class="form-control" />
+                <input asp-for="StarRating" class="form-control" type="number" min="1" max="5" placeholder="1-5" />
                 <span asp-validation-for="StarRating" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Address" class="control-label"></label>
-                <input asp-for="Address" class="form-control" />
+                <input asp-for="Address" class="form-control" placeholder="Наприклад, вул. Центральна, 1" />
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Короткий опис готелю..."></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Зберегти" class="btn btn-primary" /> |
+                <a asp-action="Index" class="btn btn-secondary">Повернутися до списку</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

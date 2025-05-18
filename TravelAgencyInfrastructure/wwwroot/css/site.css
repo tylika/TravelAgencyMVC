@@ -1,31 +1,155 @@
+/* Загальні стилі */
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    html {
+        font-size: 16px;
+    }
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px; /* Відступ для футера */
+    background-color: #f0fff0; /* Дуже світло-салатовий фон для тіла */
+    color: #2F4F4F; /* Темно-сіро-зелений для основного тексту */
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+h1, h2, h3, h4, h5, h6 {
+    color: #2E8B57; /* Морська зелень для заголовків */
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Навігаційна панель */
+.navbar-custom {
+    background-color: #90EE90; /* Світло-зелений */
+    border-bottom: 1px solid #3CB371; /* Середньо-морська зелень */
+}
+
+    .navbar-custom .navbar-brand {
+        color: #2F4F4F; /* Темний для бренду */
+        font-weight: bold;
+    }
+
+        .navbar-custom .navbar-brand:hover,
+        .navbar-custom .navbar-brand:focus {
+            color: #2E8B57;
+        }
+
+    .navbar-custom .nav-link {
+        color: #2F4F4F; /* Темний для посилань */
+    }
+
+        .navbar-custom .nav-link:hover,
+        .navbar-custom .nav-link:focus {
+            color: #006400; /* Темно-зелений при наведенні */
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+    .navbar-custom .navbar-toggler {
+        border-color: rgba(47, 79, 79, 0.5); /* Темний для рамки тоглера */
+    }
+
+    .navbar-custom .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2847, 79, 79, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+
+/* Кнопки */
+.btn-primary {
+    color: #fff;
+    background-color: #3CB371; /* Середньо-морська зелень */
+    border-color: #2E8B57; /* Морська зелень */
+}
+
+    .btn-primary:hover {
+        color: #fff;
+        background-color: #2E8B57;
+        border-color: #20603D;
+    }
+
+.btn-secondary {
+    color: #fff;
+    background-color: #8FBC8F; /* Темно-морська зелень */
+    border-color: #709670;
+}
+
+    .btn-secondary:hover {
+        color: #fff;
+        background-color: #7AAB7A;
+        border-color: #618961;
+    }
+
+.btn-danger {
+    color: #fff;
+    background-color: #FF6347; /* Томатний (для контрасту з зеленим) */
+    border-color: #E0523B;
+}
+
+    .btn-danger:hover {
+        color: #fff;
+        background-color: #D34127;
+        border-color: #B83A23;
+    }
+
+
+/* Таблиці */
+.table {
+    background-color: #fff; /* Білий фон для таблиць для читабельності */
+}
+
+    .table thead th {
+        background-color: #98FB98; /* Блідо-зелений для заголовків таблиць */
+        color: #2F4F4F;
+        border-bottom: 2px solid #3CB371;
+    }
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #F5FFFA; /* М'ятний крем */
+}
+
+.table-hover tbody tr:hover {
+    background-color: #E0EEE0; /* Світліший зелений при наведенні */
+}
+
+
+/* Форми */
+.form-control:focus {
+    border-color: #3CB371;
+    box-shadow: 0 0 0 0.25rem rgba(60, 179, 113, 0.25);
+}
+
+/* Футер */
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px; /* Висота футера */
+    background-color: #E0F2E0; /* Дуже світлий зелений для футера */
+}
+
+    .footer a {
+        color: #2E8B57;
+    }
+
+        .footer a:hover {
+            color: #006400;
+        }
+
+/* Для валідації */
+.field-validation-error {
+    color: #FF6347; /* Томатний */
+}
+
+.validation-summary-errors {
+    color: #FF6347;
+}
+
+.input-validation-error {
+    border-color: #FF6347;
 }
